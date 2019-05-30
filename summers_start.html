@@ -4080,13 +4080,22 @@
             y_max = 0.05
 
             // INSERT SCALES HERE
-            
+            var x = d3.scaleLinear().range([0,width]).domain([x_min,x_max)]
+            var y = d3.scaleLinear().range([height,0]).domain([y_min,y_max)]                  
             // Creates area objects based on the data
             // INSERT AREA OBJECT HERE
-
+            var area = d3.area()
+                .x(d => x(z_base))
+                .y0(d=> y(d,d))
+                .y1(height)
+                .curve(d3.curveBasis)
             // Append the baseline `path`` for the base decade (viz_decade) of 1951-1960
             // APPEND THE BASE LINE AREA (fill shoudl be url(#hatch), opacity 0.15)
-
+            chart.append('path')
+                 .data(hist)
+                 .attr('d',area(hist.filter(d=>d.viz_decade == "1951-1960")))
+                 .style("fill","url(#hatch)")
+                 .style("opacity",0.15)
             // Append a white mask for the baseline decade
             var h = chart.append('defs')
                             .append('mask')
@@ -4112,10 +4121,20 @@
                 d.start = start
                 start = d.end
             })
-
+            console.log(colors)
+            
             // Fill rectangles using the color and use the mask
             // ADD THE RECTANGLES FOR THE COLOR MASK (opacity should be 0.7, set mask style to url(#mask))
-
+            chart.selectAll()
+                 .data(colors)
+                 .enter()
+                 .append("rect")
+                 .style("fill",d => d.fill)
+                 .attr("x",d => d.start)
+                 .attr("width", d => x(d.end) - x(d.start))
+                 .atr("height",height)
+                 .style("opacity",0.7)
+                 .style("mask","url(#mask)")
             // Add scale descriptors
             // ADD THE TEXT FOR THE COLORS
             
